@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react"
 import { AuthProvider, useAuth } from "./context/AuthContext"
 import { api } from "./lib/api"
-import { obtenerRespuesta } from "./geminiService"
 import LoginPage from "./pages/LoginPage"
 import Sidebar from "./components/Sidebar"
 import TabBar from "./components/TabBar"
@@ -13,108 +12,6 @@ import ReportesTable from "./components/ReportesTable"
 import ConfiguracionTable from "./components/ConfiguracionTable"
 import CatalogosTable from "./components/CatalogosTable"
 import "./App.css"
-
-// --------------------------------------------------
-// Módulo de Asistente IA con Gemini
-// --------------------------------------------------
-function AsistenteIAModule() {
-  const [prompt, setPrompt] = useState("")
-  const [respuesta, setRespuesta] = useState("")
-  const [cargando, setCargando] = useState(false)
-  const [error, setError] = useState(null)
-
-  const handleConsultar = async (e) => {
-    e.preventDefault()
-    if (!prompt.trim()) return
-
-    setCargando(true)
-    setError(null)
-    setRespuesta("")
-
-    try {
-      const result = await obtenerRespuesta(prompt)
-      setRespuesta(result)
-    } catch (err) {
-      setError(err.message || "Error al conectar con la API de Gemini.")
-    } finally {
-      setCargando(false)
-    }
-  }
-
-  return (
-    <div style={{ padding: "24px", maxWidth: "850px", margin: "0 auto", width: "100%" }} className="fade-in">
-      <div className="placeholder-card glass-strong" style={{ textAlign: "left", alignItems: "stretch" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <span style={{ fontSize: "32px" }}>✨</span>
-          <div>
-            <h3>Asistente IA (Gemini)</h3>
-            <p style={{ color: "var(--text-secondary)", fontSize: 13, margin: 0 }}>
-              Genera resúmenes, analiza la información de siniestros o redacta borradores de requerimientos.
-            </p>
-          </div>
-        </div>
-
-        <form onSubmit={handleConsultar} style={{ display: "flex", flexDirection: "column", gap: "12px", marginTop: "20px" }}>
-          <textarea
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Escribe tu consulta aquí... Ej: '¿Cuáles son los requisitos habituales para dictaminar un siniestro vehicular?'"
-            rows={4}
-            style={{
-              padding: "14px",
-              borderRadius: "10px",
-              background: "rgba(0, 0, 0, 0.2)",
-              color: "var(--text-primary)",
-              border: "1px solid var(--glass-border)",
-              resize: "vertical",
-              fontFamily: "inherit",
-              fontSize: "14px"
-            }}
-          />
-          <button
-            type="submit"
-            disabled={cargando || !prompt.trim()}
-            style={{
-              padding: "12px 24px",
-              borderRadius: "8px",
-              background: "var(--accent, #00d4aa)",
-              color: "#000",
-              fontWeight: "bold",
-              border: "none",
-              cursor: cargando || !prompt.trim() ? "not-allowed" : "pointer",
-              alignSelf: "flex-end",
-              transition: "opacity 0.2s"
-            }}
-          >
-            {cargando ? "Analizando con Gemini..." : "Consultar a Gemini"}
-          </button>
-        </form>
-
-        {error && (
-          <div style={{ marginTop: "16px", padding: "12px", background: "rgba(255,107,107,0.1)", border: "1px solid #ff6b6b", borderRadius: "8px", color: "#ff6b6b", fontSize: "14px" }}>
-            {error}
-          </div>
-        )}
-
-        {respuesta && (
-          <div style={{
-            marginTop: "24px",
-            padding: "20px",
-            background: "rgba(255, 255, 255, 0.04)",
-            border: "1px solid var(--glass-border)",
-            borderRadius: "12px",
-            whiteSpace: "pre-wrap",
-            fontSize: "14px",
-            lineHeight: "1.6"
-          }}>
-            <h4 style={{ margin: "0 0 12px 0", color: "var(--accent, #00d4aa)" }}>Respuesta de Gemini:</h4>
-            <p style={{ margin: 0, color: "var(--text-primary)" }}>{respuesta}</p>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
 
 // --------------------------------------------------
 // Inner shell — rendered only when user is logged in
@@ -262,11 +159,6 @@ function AppShell() {
 
   // Render tab content
   const renderContent = () => {
-    // 0. ASISTENTE IA (GEMINI)
-    if (activeTab === "Asistente IA" || activeTab === "Gemini" || activeTab === "IA") {
-      return <AsistenteIAModule />
-    }
-
     // 1. RESUMEN EJECUTIVO (DASHBOARD)
     if (activeTab === "Resumen Ejecutivo" || activeTab === "Inicio") {
       return (
