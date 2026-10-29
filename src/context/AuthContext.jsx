@@ -29,10 +29,22 @@ export function AuthProvider({ children }) {
                         const userData = await res.json()
                         setUser(userData)
                     } else {
-                        setUser(null)
+                        // Modo demo: fallback con datos de Firebase
+                        setUser({
+                            uid: firebaseUser.uid,
+                            email: firebaseUser.email,
+                            displayName: firebaseUser.displayName || firebaseUser.email,
+                            photoURL: firebaseUser.photoURL,
+                        })
                     }
                 } catch {
-                    setUser(null)
+                    // Modo demo: si el backend local no responde, usa datos de Firebase
+                    setUser({
+                        uid: firebaseUser.uid,
+                        email: firebaseUser.email,
+                        displayName: firebaseUser.displayName || firebaseUser.email,
+                        photoURL: firebaseUser.photoURL,
+                    })
                 }
             } else {
                 setUser(null)
@@ -44,29 +56,58 @@ export function AuthProvider({ children }) {
 
     const login = async (email, password) => {
         const cred = await signInWithEmailAndPassword(auth, email, password)
-        const token = await cred.user.getIdToken()
-        const res = await fetch(`${BASE_URL}/auth/sync`, {
-            method: "POST",
-            headers: { Authorization: `Bearer ${token}` },
-        })
-        if (!res.ok) throw new Error("Error al sincronizar usuario")
-        const userData = await res.json()
-        setUser(userData)
-        return userData
+        try {
+            const token = await cred.user.getIdToken()
+            const res = await fetch(`${BASE_URL}/auth/sync`, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${token}` },
+            })
+            if (res.ok) {
+                const userData = await res.json()
+                setUser(userData)
+                return userData
+            }
+        } catch (backendError) {
+            console.warn("Backend no disponible en producción, usando modo demo:", backendError)
+        }
+
+        // Fallback si no hay backend activo
+        const fallbackUser = {
+            uid: cred.user.uid,
+            email: cred.user.email,
+            displayName: cred.user.displayName || cred.user.email,
+        }
+        setUser(fallbackUser)
+        return fallbackUser
     }
 
     const loginWithGoogle = async () => {
         const provider = new GoogleAuthProvider()
         const cred = await signInWithPopup(auth, provider)
-        const token = await cred.user.getIdToken()
-        const res = await fetch(`${BASE_URL}/auth/sync`, {
-            method: "POST",
-            headers: { Authorization: `Bearer ${token}` },
-        })
-        if (!res.ok) throw new Error("Error al sincronizar usuario")
-        const userData = await res.json()
-        setUser(userData)
-        return userData
+        try {
+            const token = await cred.user.getIdToken()
+            const res = await fetch(`${BASE_URL}/auth/sync`, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${token}` },
+            })
+            if (res.ok) {
+                const userData = await res.json()
+                setUser(userData)
+                return userData
+            }
+        } catch (backendError) {
+            console.warn("Backend no disponible en producción, usando modo demo:", backendError)
+        }
+
+        // Fallback con datos reales de la cuenta de Google
+        const fallbackUser = {
+            uid: cred.user.uid,
+            email: cred.user.email,
+            displayName: cred.user.displayName,
+            photoURL: cred.user.photoURL,
+        }
+        setUser(fallbackUser)
+        return fallbackUser
     }
 
     const logout = async () => {

@@ -1,13 +1,15 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   base: '/siniestrosapp-frontend/',
   server: {
     proxy: {
-      '/siniestros': 'http://localhost:8000',
+      '^/siniestros($|[/?])': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
       '/archivos': 'http://localhost:8000',
       '/facturas': 'http://localhost:8000',
       '/requerimientos': 'http://localhost:8000',

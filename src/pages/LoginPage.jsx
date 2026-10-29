@@ -12,7 +12,7 @@ export default function LoginPage() {
   const [busy, setBusy] = useState(false)
 
   // ESTADO PARA CONTROLAR EL MODAL DE PRIVACIDAD / SGI
-  const [modalContenido, setModalContenido] = useState(null) // 'privacidad' | 'sgi' | null
+  const [modalContenido, setModalContenido] = useState(null)
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -90,8 +90,8 @@ export default function LoginPage() {
               type="button"
               onClick={() => setMode("password")}
               className={`flex items-center justify-center gap-2 py-2 px-3 text-xs sm:text-sm font-semibold rounded-lg transition-all duration-200 cursor-pointer ${mode === "password"
-                  ? "text-[#1a73e8] bg-white shadow-xs"
-                  : "text-[#5f6368] hover:text-[#202124]"
+                ? "text-[#1a73e8] bg-white shadow-xs"
+                : "text-[#5f6368] hover:text-[#202124]"
                 }`}
             >
               <svg className="w-4 h-4 text-[#1a73e8]" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24">
@@ -105,8 +105,8 @@ export default function LoginPage() {
               type="button"
               onClick={() => setMode("google")}
               className={`flex items-center justify-center gap-2 py-2 px-3 text-xs sm:text-sm font-semibold rounded-lg transition-all duration-200 cursor-pointer ${mode === "google"
-                  ? "text-[#1a73e8] bg-white shadow-xs"
-                  : "text-[#5f6368] hover:text-[#202124]"
+                ? "text-[#1a73e8] bg-white shadow-xs"
+                : "text-[#5f6368] hover:text-[#202124]"
                 }`}
             >
               <GoogleIcon />
@@ -358,7 +358,6 @@ export default function LoginPage() {
                     </a>
                   </p>
 
-                  {/* INSTRUCCIONES Y DESCARGA DIRECTA DE FORMATOS OFICIALES PDF */}
                   <div className="mt-6 pt-4 border-t border-[#f1f3f4] space-y-3">
                     <h5 className="font-bold text-[#202124] text-xs uppercase tracking-wider">
                       INSTRUCCIONES:
@@ -466,7 +465,6 @@ export default function LoginPage() {
                     </div>
                   </div>
 
-                  {/* ENLACE DIRECTO PARA DESCARGAR EL PDF REAL DE LA POLÍTICA SGI */}
                   <div className="pt-2">
                     <a
                       href="/docs/Politica_del_Sistema_de_Gestion_Integral_.pdf"
