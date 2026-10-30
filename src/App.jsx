@@ -13,6 +13,29 @@ import ConfiguracionTable from "./components/ConfiguracionTable"
 import CatalogosTable from "./components/CatalogosTable"
 import "./App.css"
 
+// Helper universal para ejecutar peticiones tanto si api es fetch o axios/objeto
+async function requestApi(endpoint, options = {}) {
+  try {
+    let res
+    if (typeof api === "function") {
+      res = await api(endpoint, options)
+    } else if (api && typeof api.get === "function") {
+      res = await api.get(endpoint, options)
+    } else {
+      res = await fetch(`http://localhost:8000${endpoint}`, options)
+    }
+
+    if (res && typeof res.json === "function") {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      return await res.json()
+    }
+
+    return res?.data ?? res
+  } catch (err) {
+    throw err
+  }
+}
+
 // --------------------------------------------------
 // Inner shell — rendered only when user is logged in
 // --------------------------------------------------
@@ -48,47 +71,94 @@ function AppShell() {
 
   // Fetch siniestros
   useEffect(() => {
-    if (!user) return
     let alive = true
     const ctrl = new AbortController()
     setLoadingSiniestros(true)
     setSiniestrosError(null)
-    api("/siniestros", { signal: ctrl.signal })
-      .then((r) => { if (!r.ok) throw new Error(`Error ${r.status}`); return r.json() })
-      .then((data) => { if (alive && Array.isArray(data)) setSiniestros(data) })
-      .catch((e) => { if (alive && e.name !== "AbortError") setSiniestrosError("No se pudo cargar el listado de siniestros.") })
-      .finally(() => { if (alive) setLoadingSiniestros(false) })
-    return () => { alive = false; ctrl.abort() }
+
+    console.log("Iniciando carga de siniestros desde el backend...")
+
+    requestApi("/siniestros", { signal: ctrl.signal })
+      .then((data) => {
+        console.log("Siniestros recibidos:", data)
+        const items = Array.isArray(data) ? data : data?.data || []
+        if (alive) setSiniestros(items)
+      })
+      .catch((e) => {
+        if (alive && e.name !== "AbortError") {
+          console.error("Error al cargar siniestros:", e)
+          setSiniestrosError(e.message || "No se pudo cargar el listado de siniestros.")
+          setSiniestros([])
+        }
+      })
+      .finally(() => {
+        if (alive) setLoadingSiniestros(false)
+      })
+
+    return () => {
+      alive = false
+      ctrl.abort()
+    }
   }, [user])
 
   // Fetch requerimientos
   useEffect(() => {
-    if (!user) return
     let alive = true
     const ctrl = new AbortController()
     setLoadingReq(true)
     setReqError(null)
-    api("/requerimientos", { signal: ctrl.signal })
-      .then((r) => { if (!r.ok) throw new Error(`Error ${r.status}`); return r.json() })
-      .then((data) => { if (alive && Array.isArray(data)) setRequerimientos(data) })
-      .catch((e) => { if (alive && e.name !== "AbortError") setReqError("No se pudo cargar requerimientos.") })
-      .finally(() => { if (alive) setLoadingReq(false) })
-    return () => { alive = false; ctrl.abort() }
+
+    requestApi("/requerimientos", { signal: ctrl.signal })
+      .then((data) => {
+        console.log("Requerimientos recibidos:", data)
+        const items = Array.isArray(data) ? data : data?.data || []
+        if (alive) setRequerimientos(items)
+      })
+      .catch((e) => {
+        if (alive && e.name !== "AbortError") {
+          console.error("Error al cargar requerimientos:", e)
+          setReqError(e.message || "No se pudo cargar requerimientos.")
+          setRequerimientos([])
+        }
+      })
+      .finally(() => {
+        if (alive) setLoadingReq(false)
+      })
+
+    return () => {
+      alive = false
+      ctrl.abort()
+    }
   }, [user])
 
   // Fetch facturas
   useEffect(() => {
-    if (!user) return
     let alive = true
     const ctrl = new AbortController()
     setLoadingFacturas(true)
     setFacturasError(null)
-    api("/facturas", { signal: ctrl.signal })
-      .then((r) => { if (!r.ok) throw new Error(`Error ${r.status}`); return r.json() })
-      .then((data) => { if (alive && Array.isArray(data)) setFacturas(data) })
-      .catch((e) => { if (alive && e.name !== "AbortError") setFacturasError("No se pudo cargar facturas.") })
-      .finally(() => { if (alive) setLoadingFacturas(false) })
-    return () => { alive = false; ctrl.abort() }
+
+    requestApi("/facturas", { signal: ctrl.signal })
+      .then((data) => {
+        console.log("Facturas recibidas:", data)
+        const items = Array.isArray(data) ? data : data?.data || []
+        if (alive) setFacturas(items)
+      })
+      .catch((e) => {
+        if (alive && e.name !== "AbortError") {
+          console.error("Error al cargar facturas:", e)
+          setFacturasError(e.message || "No se pudo cargar facturas.")
+          setFacturas([])
+        }
+      })
+      .finally(() => {
+        if (alive) setLoadingFacturas(false)
+      })
+
+    return () => {
+      alive = false
+      ctrl.abort()
+    }
   }, [user])
 
   // Tab helpers

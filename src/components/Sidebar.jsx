@@ -1,7 +1,6 @@
-import { useState } from "react"
 import { useAuth } from "../context/AuthContext"
 
-// Módulos planos idénticos a Stitch (sin desplegables/children)
+// Módulos de navegación planos
 export const menuItems = [
     {
         label: "Resumen Ejecutivo",
@@ -69,7 +68,6 @@ export const menuItems = [
     },
 ]
 
-// Permisos actualizados con "Catálogos"
 export const MENU_POR_ROL = {
     admin: ["Resumen Ejecutivo", "Siniestralidad", "Control de Facturas", "Requerimientos", "Reportes y Auditoría", "Catálogos", "Configuración"],
     supervisor: ["Resumen Ejecutivo", "Siniestralidad", "Control de Facturas", "Requerimientos", "Reportes y Auditoría", "Catálogos", "Configuración"],
@@ -78,7 +76,8 @@ export const MENU_POR_ROL = {
 }
 
 export function filtrarMenuPorRol(items, rol) {
-    const permitidos = MENU_POR_ROL[rol] || MENU_POR_ROL.capturista
+    const rolNormalizado = String(rol || "capturista").toLowerCase()
+    const permitidos = MENU_POR_ROL[rolNormalizado] || MENU_POR_ROL.capturista
     return items.filter((item) => permitidos.includes(item.label))
 }
 
@@ -97,23 +96,20 @@ export default function Sidebar({ activeTab, onSelect, onOpenTab, collapsed, set
 
     return (
         <aside className={`bg-white border-r border-[#E5E2D5] flex flex-col justify-between shrink-0 min-h-screen transition-all duration-300 z-20 ${collapsed ? "w-16" : "w-64"}`}>
-            {/* MARCA / CABECERA */}
+            {/* MARCA / CABECERA CON PUNTO EN EL PISO DEL TEXTO */}
             <div>
                 <div className="p-4 sm:p-5 flex items-center justify-between border-b border-[#F0ECE1]">
-                    <div className="flex items-center gap-3 overflow-hidden">
-                        <div className="w-9 h-9 rounded-lg bg-[#1b4965] text-white flex items-center justify-center font-black shadow-sm shrink-0">
-                            <svg className="w-5 h-5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-                            </svg>
-                        </div>
-                        {!collapsed && (
-                            <div className="truncate">
-                                <span className="block text-[10px] uppercase tracking-wider text-slate-400 font-bold leading-tight">
-                                    SINIESTROS APP
+                    <div className="flex items-center overflow-hidden">
+                        {!collapsed ? (
+                            <div className="flex items-baseline tracking-tight">
+                                <span className="font-black text-xl text-[#0a192f] tracking-wider leading-none">
+                                    SINESTRY
                                 </span>
-                                <span className="font-extrabold text-sm tracking-tight text-slate-800">
-                                    SINIESTRY APP
-                                </span>
+                                <span className="w-2 h-2 rounded-full bg-[#EA4335] ml-1 shrink-0 inline-block translate-y-[-1px]" />
+                            </div>
+                        ) : (
+                            <div className="w-8 h-8 rounded-lg bg-[#0a192f] text-white flex items-center justify-center font-black text-sm shrink-0">
+                                S<span className="text-[#EA4335] leading-none">.</span>
                             </div>
                         )}
                     </div>
@@ -156,25 +152,9 @@ export default function Sidebar({ activeTab, onSelect, onOpenTab, collapsed, set
                 </nav>
             </div>
 
-            {/* STATUS E INFO DE USUARIO */}
-            <div className="p-3 border-t border-[#ECE8DC] bg-[#FAF9F5] space-y-3">
-                {!collapsed && (
-                    <div className="mb-2">
-                        <div className="flex justify-between items-center text-[11px] font-bold text-slate-600 mb-1">
-                            <span>FONADIN</span>
-                            <span className="text-amber-700">CAPUFE</span>
-                        </div>
-                        <div className="w-full h-2 rounded-full overflow-hidden flex bg-slate-200">
-                            <div className="bg-[#1b4965] h-full" style={{ width: '96.4%' }} />
-                            <div className="bg-amber-600 h-full" style={{ width: '3.6%' }} />
-                        </div>
-                        <p className="text-[10px] text-slate-500 mt-1 text-center font-mono">
-                            96.4% / 3.6% Operatividad
-                        </p>
-                    </div>
-                )}
-
-                <div className="flex items-center justify-between pt-2 border-t border-slate-200/60">
+            {/* INFO DE USUARIO AUTENTICADO */}
+            <div className="p-3 border-t border-[#ECE8DC] bg-[#FAF9F5]">
+                <div className="flex items-center justify-between">
                     {!collapsed ? (
                         <div className="truncate pr-2">
                             <p className="text-xs font-bold text-slate-800 truncate">{user?.nombre || user?.email || "Usuario"}</p>
@@ -182,7 +162,7 @@ export default function Sidebar({ activeTab, onSelect, onOpenTab, collapsed, set
                         </div>
                     ) : (
                         <div className="w-7 h-7 rounded-full bg-[#1b4965] text-white flex items-center justify-center font-bold text-xs">
-                            {user?.nombre?.[0] || "U"}
+                            {user?.nombre?.[0] || user?.email?.[0] || "U"}
                         </div>
                     )}
 
